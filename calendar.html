@@ -15,18 +15,18 @@
 
         body {
             background-color: transparent; /* 适配Notion背景透明 */
-            padding: 16px;
-            max-width: 600px;
+            padding: 8px;
+            max-width: 400px;
             margin: 0 auto;
         }
 
         /* 日历容器 */
         .calendar-container {
             border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 16px;
+            border-radius: 6px;
+            padding: 10px;
             background-color: #ffffff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
 
         /* 日历头部（月份切换+标题） */
@@ -34,22 +34,22 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            margin-bottom: 10px;
         }
 
         .calendar-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
             color: #333333;
         }
 
         .calendar-btn {
-            padding: 4px 8px;
+            padding: 2px 6px;
             border: 1px solid #e0e0e0;
-            border-radius: 4px;
+            border-radius: 3px;
             background-color: #f7f7f7;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 12px;
             color: #333333;
             transition: background-color 0.2s;
         }
@@ -58,35 +58,35 @@
             background-color: #e0e0e0;
         }
 
-        /* 星期头部 */
+        /* 星期头部 - 调整为周一到周日排序 */
         .week-header {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
-            margin-bottom: 8px;
+            gap: 4px;
+            margin-bottom: 4px;
         }
 
         .week-day {
             text-align: center;
-            font-size: 12px;
+            font-size: 10px;
             color: #666666;
             font-weight: 500;
-            padding: 8px 0;
+            padding: 4px 0;
         }
 
         /* 日期网格 */
         .dates-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
+            gap: 4px;
         }
 
         .date-item {
             text-align: center;
-            padding: 12px 0;
-            font-size: 14px;
+            padding: 6px 0;
+            font-size: 12px;
             color: #333333;
-            border-radius: 4px;
+            border-radius: 3px;
             cursor: default;
         }
 
@@ -117,15 +117,15 @@
             <button class="calendar-btn" id="nextMonth">下月 →</button>
         </div>
 
-        <!-- 星期头部 -->
+        <!-- 星期头部 - 调整为周一到周日 -->
         <div class="week-header">
-            <div class="week-day">日</div>
             <div class="week-day">一</div>
             <div class="week-day">二</div>
             <div class="week-day">三</div>
             <div class="week-day">四</div>
             <div class="week-day">五</div>
             <div class="week-day">六</div>
+            <div class="week-day">日</div>
         </div>
 
         <!-- 日期网格 -->
@@ -179,16 +179,18 @@
             const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
             // 获取当前月的最后一天
             const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
-            // 获取当前月第一天是星期几（0=周日，6=周六）
-            const firstDayWeek = firstDayOfMonth.getDay();
+            // 获取当前月第一天是星期几（0=周日，6=周六），转换为周一为第一天的逻辑
+            const firstDayWeek = firstDayOfMonth.getDay() === 0 ? 6 : firstDayOfMonth.getDay() - 1;
             // 获取当前月的总天数
             const totalDays = lastDayOfMonth.getDate();
-
             // 获取上个月的最后几天（填充到日历开头）
             const lastDayOfPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
 
-            // 生成日历格子（总格子数=42或35，对应6周或5周）
-            const totalCells = 42; // 固定6周，确保日历布局整齐
+            // 计算需要的总格子数（只显示必要的行数，不显示下个月多余行）
+            const totalWeeks = Math.ceil((firstDayWeek + totalDays) / 7);
+            const totalCells = totalWeeks * 7;
+
+            // 生成日历格子
             for (let i = 0; i < totalCells; i++) {
                 const dateItem = document.createElement('div');
                 dateItem.classList.add('date-item');
@@ -213,10 +215,9 @@
                         dateItem.classList.add('today');
                     }
                 }
-                // 下个月的日期
+                // 超出当月的部分不再生成（移除下个月多余行）
                 else {
-                    day = i - (firstDayWeek + totalDays) + 1;
-                    dateItem.classList.add('other-month');
+                    continue;
                 }
 
                 dateItem.textContent = day;
